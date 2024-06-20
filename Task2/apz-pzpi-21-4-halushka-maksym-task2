@@ -1,0 +1,421 @@
+Вступ:  
+Метою даної лабораторної роботи є розробка серверної частини для програмної системи для аналізу зон збуту їжі.
+ 
+Хід роботи: 
+Опис архітектури системи;  
+Загальна архітектура системи;  
+Структура бази даних;  
+Будова серверних компонентів системи, специфікація REST, методи взаємодії компонентів.  
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+
+
+
+
+
+
+
+1  МОДЕЛЮВАННЯ ПРОГРАМНОЇ СИСТЕМИ 
+Користувачами розробленої системи є 2 типи акторів: клієнт та адміністратор.  
+Основними потребами клієнта є:  
+−  показ даних про продажі
+− аналіз ринку
+− відображення сповіщень про важливі події
+− створення, редагування та видалення облікового запису
+Основними потребами адміністратора є:  
+	− можливість створення резервних копій даних системи 
+− рєєстрація та вхід в акаунт;
+Взаємодію кожної ролі користувачів з системою представлено на діаграмі прецедентів (див. рис. 1). 
+ 
+
+
+Рисунок 1 – Діаграма прецедентів для серверної частини програми 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+  	 
+
+
+
+ПРОЄКТУВАННЯ БАЗИ ДАНИХ 
+ER-модель (див. рис. 2). складається з 5 сутностей: User (Користувач), 
+Sales (Продажі), Notification(Сповіщення), Role (Роль користувача), Permissions(Дозволи), Backups(Резервні копії). Було виділено наступні зв’язки: 
+User - Role: 
+- Багато до багатьох (N:N) 
+- Кожен користувач може мати кілька ролей, і кожна роль може бути прив'язана до кількох користувачів.
+2.  User - Sale: 
+-Один до багатьох (1:N) 
+-Один користувач може здійснити кілька продажів.
+3.  User - Permissions: 
+- Багато до багатьох (N:N) 
+- Кожен користувач може мати кілька дозволів, і кожен дозвіл може бути наданий кільком користувачам.
+4.  User - Notification: 
+- Один до багатьох (1:N) 
+- Один користувач може мати кілька сповіщень
+5.  User - Backups: 
+- Один до одного (1:1) 
+- Один запис резервного копіювання може бути прив'язаний до одного користувача.
+
+ 
+Рисунок 2 – ER-модель даних серверної частини 
+ 	
+
+
+
+
+
+
+
+
+3 ТЕХНОЛОГІЇ ТА АРХІТЕКТУРНІ РІШЕННЯ 
+	Модуль для управління конфігураціями у NestJS використовувався ConfigModule. Він дозволяє централізовано управляти конфігураціями додатку, що полегшує налаштування і розгортання в різних середовищах. 
+	Модуль для перевірки стану здоров'я додатку це HealthModule. Він дозволяє легко перевіряти стан різних компонентів системи, таких як база даних, API і т.д. 
+	PostgreSQL забезпечує високий рівень надійності, масштабованості і відповідності ACID. Вона підтримує складні запити і індексацію, що робить її відмінним вибором для проектів, які вимагають обробки великої кількості даних. 
+	TypeORM дозволяє легко працювати з базою даних, використовуючи об'єкти. Він інтегрується з NestJS і дозволяє легко управляти базою даних через моделі.
+	JWT дозволяє створювати безпечні токени для авторизації користувачів, які можна легко перевіряти на сервері.
+	NestJS забезпечує модульну архітектуру, яка дозволяє легко організовувати код і розширювати функціональність додатку. Він також підтримує використання сучасних стандартів JavaScript і TypeScript.
+	TypeScript допомагає виявляти помилки на етапі компіляції, що знижує кількість багів у коді. 
+ 
+Рисунок 3 – UML діаграма розгортання серверної частини 
+ 	 
+СПЕЦИФІКАЦІЯ REST 
+REST API застосунку складається з 24 кінцевих точок. Специфікацію кожної з кінцевих точок наведено в таблиці 1. 
+ 
+Таблиця 1 – Специфікація REST API 
+Сутність
+Метод
+Посилання
+Дія
+Користувач
+GET
+/api/users/{id}
+Отримати інформацію про користувача за ID
+POST
+/api/users
+Створити нового користувача
+PUT
+/api/users/{id}
+Оновити інформацію про користувача за ID
+DELETE
+/api/users/{id}
+Видалити користувача за ID
+Роль
+GET
+/api/roles/{id}
+Отримати інформацію про роль за ID
+POST
+/api/roles
+Створити нову роль
+PUT
+/api/roles/{id}
+Оновити інформацію про роль за ID
+DELETE
+/api/roles/{id}
+Видалити роль за ID
+Дозволи
+GET
+/api/permissions/{id}
+Отримати інформацію про дозвіл за ID
+POST
+/api/permissions
+Створити новий дозвіл
+PUT
+/api/permissions/{id}
+Оновити інформацію про дозвіл за ID
+DELETE
+/api/permissions/{id}
+Видалити дозвіл за ID
+Продажі
+GET
+/api/sales/{id}
+Отримати інформацію про продаж за ID
+POST
+/api/sales
+Створити новий запис про продаж
+PUT
+/api/sales/{id}
+Оновити інформацію про продаж за ID
+DELETE
+/api/sales/{id}
+Видалити запис про продаж за ID
+Сповіщення
+GET
+/api/notifications/{id}
+Отримати інформацію про сповіщення за ID
+POST
+/api/notifications
+Створити нове сповіщення
+PUT
+/api/notifications/{id}
+Оновити інформацію про сповіщення за ID
+DELETE
+/api/notifications/{id}
+Видалити сповіщення за ID
+Резервні копії
+GET
+/api/backups/{id}
+Отримати інформацію про резервну копію за ID
+
+
+POST
+/api/backups
+Створити нову резервну копію
+
+
+PUT
+/api/backups/{id}
+Оновити інформацію про резервну копію за ID
+
+
+DELETE
+/api/backups/{id}
+Видалити резервну копію за ID
+
+ 
+ 
+ 
+ 
+ 
+ВИСНОВОК 
+У ході виконання лабораторної роботи були отримані навички з проектування серверної частини програмної системи, розробки сценаріїв використання, діаграм розгортання та пакетів, проектуванні бази даних. 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+
+ПЕРЕЛІК ДЖЕРЕЛ ПОСИЛАННЯ 
+Посилання на відео захисту. URL:  https://youtu.be/WE3d9pZZVXM
+Посилання на папку з джерельним кодом проєкта. URL: https://github.com/NureHalushkaMaksym/apz-pzpi-21-4-halushka-maksym/tree/main/Task2
+
+
+
+
+
+
+
+
+
+ 
+
+					
+					ДОДАТОК А 
+UML діаграма розгортання 
+ 
+Рисунок Б.1 – UML діаграма розгортання серверної частини 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ДОДАТОК Б 
+Частина програмного коду  
+// main.ts
+import { NestFactory } from '@nestjs/core';
+import { AppModule } from './app.module';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+
+
+async function bootstrap() {
+  const app = await NestFactory.create(AppModule);
+
+
+  const config = new DocumentBuilder()
+    .setTitle('Програмна система для аналізу зон збуту їжі')
+    .setDescription('API for managing food sales')
+    .setVersion('1.0')
+    .build();
+
+
+  const document = SwaggerModule.createDocument(app, config);
+  SwaggerModule.setup('api', app, document, {
+    swaggerOptions: {
+      persistAuthorization: true,
+    },
+    customSiteTitle: 'Food Sales API Documentation',
+  });
+
+
+  await app.listen(3000);
+}
+bootstrap();
+
+
+// app.module.ts
+import { Module } from '@nestjs/common';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { AppController } from './app.controller';
+import { AppService } from './app.service';
+import { UsersModule } from './users/users.module';
+import { SalesModule } from './sales/sales.module';
+import { NotificationsModule } from './notifications/notifications.module';
+import { RolesModule } from './roles/roles.module';
+import { PermissionsModule } from './permissions/permissions.module';
+import { HealthModule } from './health/health.module';
+import { AuthModule } from './auth/auth.module';
+import { Users } from './users/user.entity';
+import { Role } from './roles/role.entity';
+import { Permission } from './permissions/permission.entity';
+import { Sale } from './sales/sale.entity';
+import { MarketAnalysis } from './market_analysis/market_analysis.entity';
+import { Notification } from './notifications/notification.entity';
+import { Log } from './logs/log.entity';
+import { Backup } from './backups/backup.entity';
+import configuration from '../config';
+
+
+@Module({
+  imports: [
+    ConfigModule.forRoot({
+      load: [configuration],
+      isGlobal: true,
+    }),
+    TypeOrmModule.forRootAsync({
+      imports: [ConfigModule],
+      useFactory: async (configService: ConfigService) => ({
+        type: 'postgres',
+        host: configService.get<string>('database.host'),
+        port: configService.get<number>('database.port'),
+        username: configService.get<string>('database.username'),
+        password: configService.get<string>('database.password'),
+        database: configService.get<string>('database.name'),
+        entities: [Users, Role, Permission, Sale, MarketAnalysis, Notification, Log, Backup],
+        migrations: ['dist/migrations/*{.ts,.js}'],
+        cli: {
+          migrationsDir: 'src/migrations',
+        },
+        synchronize: false,
+      }),
+      inject: [ConfigService],
+    }),
+    UsersModule,
+    SalesModule,
+    NotificationsModule,
+    RolesModule,
+    PermissionsModule,
+    HealthModule,
+    AuthModule,
+  ],
+  controllers: [AppController],
+  providers: [AppService],
+})
+export class AppModule {}
+
+
+
+
+ // auth.module.ts
+
+
+
+import { Module } from '@nestjs/common';
+import { AuthService } from './auth.service';
+import { AuthController } from './auth.controller';
+import { LocalStrategy } from './local.strategy';
+import { PassportModule } from '@nestjs/passport';
+
+
+@Module({
+  imports: [PassportModule],
+  providers: [AuthService, LocalStrategy],
+  controllers: [AuthController],
+})
+export class AuthModule {}
+//backup.entity.ts
+import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
+
+
+@Entity()
+export class Backup {
+  @PrimaryGeneratedColumn()
+  id: number;
+
+
+  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+  backup_date: Date;
+
+
+  @Column()
+  file_path: string;
+}
+
+
+//health.module.ts
+
+
+import { Module } from '@nestjs/common';
+import { TerminusModule } from '@nestjs/terminus';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { HealthController } from './health.controller';
+
+
+@Module({
+  imports: [TerminusModule, TypeOrmModule],
+  controllers: [HealthController],
+})
+export class HealthModule {}
+
+
+
+
+//log.entity.ts
+
+
+import { Entity, Column, PrimaryGeneratedColumn, ManyToOne } from 'typeorm';
+import { User } from '../users/user.entity';
+
+
+@Entity()
+export class Log {
+  @PrimaryGeneratedColumn()
+  id: number;
+
+
+  @ManyToOne(() => User, user => user.logs)
+  user: User;
+
+
+  @Column()
+  action: string;
+
+
+  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+  timestamp: Date;
+}
